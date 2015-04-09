@@ -14,7 +14,7 @@ public class StiltsConnector {
 
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 	private static final String RIGHT_DEVICE_NAME = "RNBT-C7EF"; 
-	private static final String LEFT_DEVICE_NAME = "RNBT-C7EFK"; //TODO change to right name
+	private static final String LEFT_DEVICE_NAME = "RNBT-C628";
 
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothSocket mLeftSocket, mRightSocket;
@@ -40,7 +40,7 @@ public class StiltsConnector {
 			}
 		}
 		if (mLeftSocket == null) {
-			//throw new IOException("No left socket");
+			throw new IOException("No left socket");
 		}
 		if (mRightSocket == null) {
 			throw new IOException("No right socket");
@@ -54,7 +54,7 @@ public class StiltsConnector {
 		}
 		
 		try {
-			mRightSocket.getOutputStream().write(new byte[]{(byte) value});
+			mLeftSocket.getOutputStream().write(new byte[]{(byte) value});
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
