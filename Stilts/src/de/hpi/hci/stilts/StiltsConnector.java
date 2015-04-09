@@ -1,6 +1,7 @@
 package de.hpi.hci.stilts;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,12 +30,10 @@ public class StiltsConnector {
 			for (BluetoothDevice device : pairedDevices) {
 				Log.d(TAG, device.getName() + "\n" + device.getAddress());
 				if (device.getName().equals(RIGHT_DEVICE_NAME)) {
-					mRightSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-					mRightSocket.connect();
+					mRightSocket = createSocket(device);
 				}
 				if (device.getName().equals(LEFT_DEVICE_NAME)) {
-					mLeftSocket = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
-					mLeftSocket.connect();
+					mLeftSocket = createSocket(device);
 				}
 
 			}
@@ -45,6 +44,22 @@ public class StiltsConnector {
 		if (mRightSocket == null) {
 			throw new IOException("No right socket");
 		}
+	}
+	
+	private BluetoothSocket createSocket(BluetoothDevice device) throws IOException {
+		BluetoothSocket socket = device.createRfcommSocketToServiceRecord(MY_UUID);
+		try {						
+			socket.connect();
+		} catch (IOException e) {
+			//evil hack: http://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3/18786701#18786701
+			try {
+				socket =(BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+				socket.connect();
+			} catch (Exception e1) {
+				throw new IOException("Unable to connect using mport hack");
+			}
+		}
+		return socket;
 	}
 
 	public void setLeft(int value) {
